@@ -1,41 +1,34 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
+import { Client } from "./Client";
 const ClientDetails = () => {
   const navigate = useNavigate();
-  const goDetails = () => {
-    navigate("/showclientdetails/e001");
+  const [client, setUsers] = useState<Client[]>([]);
+  const [error, setErrors] = useState("");
+  const [isLoading, setLoading] = useState(false);
+  const showDetails = (id: number) => {
+    navigate("/showclientdetails/" + id);
   };
-  let client = [
-    {
-      code: "e001",
-      name: "Tom",
-      permission: "Edit",
-      anualSalary: 5500,
-      dateofBirth: "25/6/1988",
-    },
-    {
-      code: "e002",
-      name: "Sam",
-      permission: "View",
-      anualSalary: 6700,
-      dateofBirth: "25/11/1980",
-    },
-    {
-      code: "e003",
-      name: "Ravi",
-      permission: "All",
-      anualSalary: 8900,
-      dateofBirth: "27/11/1980",
-    },
-    {
-      code: "e001",
-      name: "Kaveri",
-      permission: "Read",
-      anualSalary: 9000,
-      dateofBirth: "9/6/1991",
-    },
-  ];
+  useEffect(() => {
+    axios
+      .get("http://localhost:5192/api/Admin/getClientList") //success  of APi Call
+      .then((res) => setUsers(res.data)) //if any error or failed the APi call to the Server
+      .catch((err) => {
+        setErrors(err.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
+  const deleteClient = (id: number) => {
+    axios
+      .get("http://localhost:5192/api/Admin/deleteClient/" + id)
+      .catch((err) => {
+        setErrors(err.message);
+      });
+  };
   return (
     <>
       <table className="table table-striped table-bordered">
@@ -57,7 +50,10 @@ const ClientDetails = () => {
               <td>{item.anualSalary}</td>
               <td>{item.dateofBirth}</td>
               <td>
-                <button onClick={goDetails}>All Clients</button>
+                <button onClick={() => showDetails(item.code)}>Details</button>
+              </td>
+              <td>
+                <button onClick={() => deleteClient(item.code)}>Delete</button>
               </td>
             </tr>
           ))}

@@ -1,28 +1,46 @@
 import React, { useState } from "react";
+import { Users } from "./User";
+import { useNavigate } from "react-router-dom";
+import axios, { AxiosResponse } from "axios";
 
-interface User {
-  UID: string;
-  name: string;
-  CompanyID: string;
-  CompanyName: string;
-  UserType: string;
+interface Props {
+  id: number;
+  username: string;
+  companyID: string;
+  companyName: string;
+  usertype: string;
 }
 
 const AddUser = () => {
-  const [UID, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [CompanyID, setCompanyID] = useState("");
-  const [CompanyName, setCompanyName] = useState("");
-  const [UserType, setUserType] = useState("");
+  const navigate = useNavigate();
+
+  const [userData, setUserData] = useState<Props>({
+    id: 0,
+    username: "",
+    companyID: "",
+    companyName: "",
+    usertype: "",
+  });
+  const [error, setErrors] = useState("");
 
   const submit = () => {
-    const user: User = {
-      UID: UID,
-      name: name,
-      CompanyID: CompanyID,
-      CompanyName: CompanyName,
-      UserType: UserType,
-    };
+    axios
+      .post("http://localhost:5192/api/Admin/addUser")
+      .then((response: AxiosResponse<number>) => {
+        navigate("/usersList");
+      })
+      .catch((error) => setErrors(error.message))
+      .finally();
+  };
+
+  const resetForm = () => {
+    setUserData({
+      id: 0,
+      username: "",
+      companyID: "",
+      companyName: "",
+      usertype: "",
+    });
   };
 
   return (
@@ -41,7 +59,10 @@ const AddUser = () => {
             className="form-control"
             id="exampleInputEmail1"
             aria-describedby="emailHelp"
-            onChange={(event) => setCode(event.target.value)}
+            value={userData.id}
+            onChange={(e) =>
+              setUserData({ ...userData, id: Number(e.target.value) })
+            }
           />
         </div>
       </div>
@@ -58,7 +79,10 @@ const AddUser = () => {
             className="form-control"
             id="exampleInputEmail1"
             aria-describedby="emailHelp"
-            onChange={(event) => setCode(event.target.value)}
+            value={userData.username}
+            onChange={(e) =>
+              setUserData({ ...userData, username: e.target.value })
+            }
           />
         </div>
       </div>
@@ -75,7 +99,10 @@ const AddUser = () => {
             className="form-control"
             id="exampleInputEmail1"
             aria-describedby="emailHelp"
-            onChange={(event) => setCode(event.target.value)}
+            value={userData.companyID}
+            onChange={(e) =>
+              setUserData({ ...userData, companyID: e.target.value })
+            }
           />
         </div>
       </div>
@@ -92,7 +119,10 @@ const AddUser = () => {
             className="form-control"
             id="exampleInputEmail1"
             aria-describedby="emailHelp"
-            onChange={(event) => setCode(event.target.value)}
+            value={userData.companyName}
+            onChange={(e) =>
+              setUserData({ ...userData, companyName: e.target.value })
+            }
           />
         </div>
       </div>

@@ -1,28 +1,35 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Users } from "./User";
 const ShowUserDetails = () => {
   const navigate = useNavigate();
   let { id } = useParams();
-  let user = {
-    UID: "e001",
-    name: "Tom",
-    CompanyID: "007",
-    CompanyName: "Infosys",
-    UserType: "Main",
-  };
+  let [user, setUser] = useState<Users>();
+  let [errors, setErrors] = useState();
+  useEffect(() => {
+    axios
+      .get("http://localhost:5192/api/Admin/getuserListbyID/" + id)
+      .then((res) => {
+        console.log(res.data);
+        setUser(res.data);
+      })
+      .catch((err) => setErrors(err.message));
+  }, []);
+  if (!user) return <h1>No such employee</h1>;
   return (
     <div>
       <h1>User Details Page {id}</h1>
       <div>
-        Code : {user.UID}
+        Code : {user.id}
         <br></br>
-        Name : {user.name}
+        Name : {user.username}
         <br></br>
-        permission : {user.CompanyID}
+        permission : {user.companyID}
         <br></br>
-        anualSalary : {user.CompanyName}
+        anualSalary : {user.companyName}
         <br></br>
-        dateofBirth : {user.UserType}
+        dateofBirth : {user.usertype}
         <br></br>
       </div>
       <button onClick={() => navigate("/userdetails/")}>All Users</button>

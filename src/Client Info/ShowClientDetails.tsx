@@ -1,15 +1,22 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { Client } from "./Client";
 const ShowClientDetails = () => {
   const navigate = useNavigate();
   let { id } = useParams();
-  let client = {
-    code: "e001",
-    name: "Tom",
-    permission: "Read",
-    anualSalary: 5500,
-    dateofBirth: "25/6/1988",
-  };
+  let [client, setClient] = useState<Client>();
+  let [errors, setErrors] = useState();
+  useEffect(() => {
+    axios
+      .get("http://localhost:5192/api/Admin/getClientListbyID/" + id)
+      .then((res) => {
+        console.log(res.data);
+        setClient(res.data);
+      })
+      .catch((err) => setErrors(err.message));
+  }, []);
+  if (!client) return <h1>No such Clients</h1>;
   return (
     <div>
       <h1>Client Details Page {id}</h1>

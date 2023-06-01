@@ -1,14 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-
-interface Users {
-  id: number;
-  username: string;
-  companyID: string;
-  companyName: string;
-  usertype: string;
-}
+import { Users } from "./User";
 
 const UserDetails = () => {
   const navigate = useNavigate();
@@ -18,9 +11,12 @@ const UserDetails = () => {
   const [users, setUsers] = useState<Users[]>([]);
   const [error, setErrors] = useState("");
   const [isLoading, setLoading] = useState(false);
+  const showDetails = (id: number) => {
+    navigate("/showuserdetails/" + id);
+  };
   useEffect(() => {
     axios
-      .get("http://localhost:5192/admin") //success  of APi Call
+      .get("http://localhost:5192/api/Admin/getUserList") //success  of APi Call
       .then((res) => setUsers(res.data)) //if any error or failed the APi call to the Server
       .catch((err) => {
         setErrors(err.message);
@@ -29,58 +25,26 @@ const UserDetails = () => {
         setLoading(false);
       });
   }, []);
+  const showUser = (user: Users) => {
+    const orginalState = [...users];
+    setUsers(users.filter((x) => x.id !== user.id));
+    axios
+      .get("http://localhost:5192/api/Admin/getuserListbyID/" + user.id)
+      .catch((err) => {
+        setErrors(err.message);
+        setUsers(orginalState);
+      });
+  };
   const deleteUser = (user: Users) => {
     const orginalState = [...users];
     setUsers(users.filter((x) => x.id !== user.id));
-    axios.delete("http://localhost:5192/admin" + user.id).catch((err) => {
-      setErrors(err.message);
-      setUsers(orginalState);
-    });
-  };
-  const addUser = () => {
-    const newUser = {
-      id: 1,
-      username: "Joswin",
-      companyID: "Triv007",
-      companyName: "KPMG",
-      usertype: "User",
-    };
-    setUsers([...users, newUser]);
     axios
-      .post("http://localhost:5192/admin", newUser)
-      .then((res) => setUsers([...users, res.data]));
+      .get("http://localhost:5192/api/Admin/deleteUser/" + user.id)
+      .catch((err) => {
+        setErrors(err.message);
+        setUsers(orginalState);
+      });
   };
-
-  // let users = [
-  //   {
-  //     UID: "e001",
-  //     name: "Tom",
-  //     CompanyID: "007",
-  //     CompanyName: "Infosys",
-  //     UserType: "Main",
-  //   },
-  //   {
-  //     UID: "e002",
-  //     name: "Jude",
-  //     CompanyID: "007",
-  //     CompanyName: "Trivium",
-  //     UserType: "Main",
-  //   },
-  //   {
-  //     UID: "e003",
-  //     name: "Rudy",
-  //     CompanyID: "007",
-  //     CompanyName: "TCS",
-  //     UserType: "Main",
-  //   },
-  //   {
-  //     UID: "e004",
-  //     name: "Bond",
-  //     CompanyID: "007",
-  //     CompanyName: "Wipro",
-  //     UserType: "Main",
-  //   },
-  // ];
 
   return (
     <>
@@ -105,13 +69,16 @@ const UserDetails = () => {
               <td>{index.companyName}</td>
               <td>{index.usertype}</td>
               <td>
+                <button onClick={() => showDetails(index.id)}>Details</button>
+              </td>
+              <td>
                 <button onClick={() => deleteUser(index)}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <button onClick={addUser}>Add User</button>   
+      <button onClick={() => navigate("/adduser/")}>Add User</button>   
     </>
   );
 };
